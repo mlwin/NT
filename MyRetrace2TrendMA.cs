@@ -116,12 +116,12 @@ namespace NinjaTrader.Indicator
 			_close 	   = RoundPrice(Close[0]);
 			
 			_ema5      = EMA(iTouchPeriod)[0];
-		    _ema13     = EMA(iFastPeriod)[0];
-		
-		    _ema20     = EMA(Typical, iSlowPeriod)[0];	
+			_ema13     = EMA(iFastPeriod)[0];
+			_ema20     = EMA(Typical, iSlowPeriod)[0];
+			
 			_srMA      = SMA(iSR_MA_Period)[0];
-		    _ppma1     = SMA(Typical, 1)[0];
-		    _ppma3     = SMA(Typical, 3)[0];
+			_ppma1     = SMA(Typical, 1)[0];
+			_ppma3     = SMA(Typical, 3)[0];
 			
 			_emaDiff   = (_ema5 - _ema20)/TickSize;
 			
@@ -132,12 +132,10 @@ namespace NinjaTrader.Indicator
 				_srMA_Last = SMA(iSR_MA_Period)[1];
 				_ema50     = EMA(50)[0];
 								
-			
 				//_ppma1Last = SMA(Typical, 1)[1];
 				_ppma3Last = SMA(Typical, 3)[1];
 				_signal.Set(0);
 				_signalAux.Set(0);
-
 			}
 						
 			if(_close  >   _open       &&
