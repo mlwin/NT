@@ -33,59 +33,45 @@ namespace NinjaTrader.Indicator
         #region Variables
         // Wizard generated variables
 		
-			private double _open 	  = 0.0;
-			private double _high 	  = 0.0;
-			private double _low       = 0.0;
-			private double _close     = 0.0;
+		private double _open 	  = 0.0;
+		private double _high 	  = 0.0;
+		private double _low       = 0.0;
+		private double _close     = 0.0;
 		
-			private double _ema5      = 0.0;
-		    private double _ema5Last  = 0.0;
+		private double _ema5      = 0.0;
+		private double _ema5Last  = 0.0;
+		private double _ema13     = 0.0;
+		private double _ema13Last = 0.0;
+		private double _ema20     = 0.0;
+		private double _ema20Last = 0.0;
+		private double _srMA      = 0.0;
+		private double _srMA_Last = 0.0;
 		
-		    private double _ema13     = 0.0;
-		    private double _ema13Last = 0.0;
+		private double _ppma1     = 0.0;
+		private double _ppma1Last = 0.0;
 		
-		    private double _ema20     = 0.0;
-		    private double _ema20Last = 0.0;
+		private double _ppma3     = 0.0;
+		private double _ppma3Last = 0.0;
+		private double _emaDiff   = 0.0;
 		
-		    private double _srMA      = 0.0;
-		    private double _srMA_Last = 0.0;
+		private double _ema50     = 0.0;
 		
-		    private double _ppma1     = 0.0;
-		    private double _ppma1Last = 0.0;
+		private bool   _bPlaySoundLong  = true;
+		private bool   _bPlaySoundShort = true;
 		
-		    private double _ppma3     = 0.0;
-		    private double _ppma3Last = 0.0;
-		
-			private double _emaDiff   = 0.0;
-		
-			private double _ema50     = 0.0;
-		
-		    private bool   _bPlaySoundLong  = true;
-		    private bool   _bPlaySoundShort = true;
-		
-		    private int    _lastBarPlayed = 0;
+		private int    _lastBarPlayed = 0;
 		    		
-		    private int iTouchPeriod  = 5;
-			private int iFastPeriod   = 12; // Default setting for FastPeriod
-			private int iSlowPeriod   = 20; // Default setting for SlowPeriod
-		    private int iSR_MA_Period = 50;
+		private int iTouchPeriod  = 5;
+		private int iFastPeriod   = 12; // Default setting for FastPeriod
+		private int iSlowPeriod   = 20; // Default setting for SlowPeriod
+		private int iSR_MA_Period = 50;
 		
-			private double _ema20LastAvg = 0.0;
-			private double _srMA_LastAvg = 0.0;
+		private string _soundFile = @"C:\Sounds\AlertAlert.wav";
 		
-			private int    _ema20_Slope = 0;
-			private int    _srMA_Slope  = 0;
+		private DataSeries _signal;
+		private DataSeries _signalAux;
 		
-		    private string _soundFile = @"C:\Sounds\AlertAlert.wav";
-
-			private DataSeries _signal;
-		    private DataSeries _signalAux;
-		
-			private double _180_over_PI = 0.0;
-		
-			
-		
-			//, _signalFromDM;
+		private double _180_over_PI = 0.0;
 		
         // User defined variables (add any user defined variables below)
         #endregion
@@ -146,18 +132,13 @@ namespace NinjaTrader.Indicator
 				_srMA_Last = SMA(iSR_MA_Period)[1];
 				_ema50     = EMA(50)[0];
 								
-				_ema20LastAvg = (_ema20Last + EMA(iSlowPeriod)[2])/2;
-				_srMA_LastAvg = (_srMA_Last + SMA(iSR_MA_Period)[2])/2;
-				
+			
 				//_ppma1Last = SMA(Typical, 1)[1];
 				_ppma3Last = SMA(Typical, 3)[1];
 				_signal.Set(0);
 				_signalAux.Set(0);
 
 			}
-			
-			_ema20_Slope = (int)(Math.Atan((_ema20-_ema20LastAvg)/TickSize)*_180_over_PI);
-			_srMA_Slope  = (int)(Math.Atan((_srMA-_srMA_LastAvg)/TickSize)*_180_over_PI);
 						
 			if(_close  >   _open       &&
 			   _low    <=  _ema5       &&  // low must be touching EMA5
@@ -179,10 +160,9 @@ namespace NinjaTrader.Indicator
 				   RSI(20, 3)[0] <  70      &&
 				   ADX(5)[0] > 10    &&
 				   ADX(5)[0] < 60    &&
-				   _emaDiff > .25 && _emaDiff < 8.0 && 
-				   _srMA_Slope  > 2)
+				   _emaDiff > .25 && _emaDiff < 8.0 )
 				{
-					DrawDiamond("DUp"+CurrentBar, true, 0, Low[0]-4*TickSize, Color.Cyan);
+					DrawDiamond("DUp"+CurrentBar, true, 0, Low[0]-8*TickSize, Color.Cyan);
 					_signalAux.Set(3);
 				}
 				
@@ -190,11 +170,6 @@ namespace NinjaTrader.Indicator
 				{
 					_lastBarPlayed = CurrentBar;
 					PlaySound(_soundFile);
-				}
-				
-				if(_ema5 > _ema13 && _ema13 > _ema20 && _ema20 > _ema50)
-				{
-					BarColorSeries[0] = Color.Cyan;
 				}
 			}
 			else if(_close  <   _open       && 
@@ -218,11 +193,9 @@ namespace NinjaTrader.Indicator
 				   RSI(20, 3)[0] >  30     &&
 				   ADX(5)[0] > 10          &&
 				   ADX(5)[0] < 60          &&
-				   _emaDiff < -.25 && _emaDiff > -7 &&
-				   //_ema20_Slope < -10 && _ema20_Slope > -50 &&
-				   _srMA_Slope  < -4)
+				   _emaDiff < -.25 && _emaDiff > -7)
 				{
-					DrawDiamond("DDown"+CurrentBar, true, 0, High[0]+4*TickSize, Color.Orange);
+					DrawDiamond("DDown"+CurrentBar, true, 0, High[0]+8*TickSize, Color.Orange);
 					_signalAux.Set(4);
 				}				
 				
@@ -230,11 +203,6 @@ namespace NinjaTrader.Indicator
 				{
 					_lastBarPlayed = CurrentBar;
 					PlaySound(_soundFile);
-				}
-				
-				if(_ema5 < _ema13 && _ema13 < _ema20 && _ema20 < _ema50)
-				{
-					BarColorSeries[0] = Color.Fuchsia;
 				}
 			}
         }
@@ -264,22 +232,7 @@ namespace NinjaTrader.Indicator
         public DataSeries SignalAux
         {
             get { Update(); return _signalAux; }
-        }
-		
-		[Browsable(false)]	// this line prevents the data series from being displayed in the indicator properties dialog, do not remove
-        [XmlIgnore()]		// this line ensures that the indicator can be saved/recovered as part of a chart template, do not remove
-        public int SlopeSlowEMA
-        {
-            get { return _ema20_Slope; }
-        }
-		
-		[Browsable(false)]	// this line prevents the data series from being displayed in the indicator properties dialog, do not remove
-        [XmlIgnore()]		// this line ensures that the indicator can be saved/recovered as part of a chart template, do not remove
-        public int SlopeSR_EMA
-        {
-            get { return _srMA_Slope; }
-        }
-		
+        }	
 		
 		[Description("")]
         [GridCategory("Parameters")]
