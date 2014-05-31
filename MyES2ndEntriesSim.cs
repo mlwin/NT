@@ -11,17 +11,6 @@ using NinjaTrader.Indicator;
 using NinjaTrader.Gui.Chart;
 using NinjaTrader.Strategy;
 #endregion
-    
-// ************************************************************************************
-//
-// This code is provided on an "AS IS" basis, without warranty of any kind,
-// including without limitation the warranties of merchantability, fitness for a
-// particular purpose and non-infringement.
-//
-// Copyright (c) 2014
-// mlwin1@yahoo.com
-//
-// ************************************************************************************
 
 // This namespace holds all strategies and is required. Do not change it.
 namespace NinjaTrader.Strategy
@@ -30,20 +19,20 @@ namespace NinjaTrader.Strategy
     /// Enter on 2nd entry signal.
     /// </summary>
     [Description("Enter on 2nd entry signal.")]
-    public class MyES2ndEntriesSim2 : Strategy
+    public class MyES2ndEntriesSim : Strategy
     {
         #region Variables
-        private string _strName       = @"MyES2ndEntriesSim";
-        
+		private string _strName       = @"MyES2ndEntriesSim";
+		
         // Wizard generated variables
         private int nPT = 4; // Default setting for NPT
         private int nSL = 8; // Default setting for NSL
-        private int nFastFilter1 = 3;
-        private int nSlowFilter1 = 20;
-        
-        double htfSMA   = 0.0;
-        double htfEMA   = 0.0;
-        
+		private int nFastFilter1 = 3;
+		private int nSlowFilter1 = 20;
+		
+		double htfSMA   = 0.0;
+		double htfEMA   = 0.0;
+		
         // User defined variables (add any user defined variables below)
         #endregion
 
@@ -52,15 +41,15 @@ namespace NinjaTrader.Strategy
         /// </summary>
         protected override void Initialize()
         {
-            Add(PeriodType.Minute, 5);
+			Add(PeriodType.Minute, 5);
             SetProfitTarget("", CalculationMode.Ticks, NPT);
             //SetStopLoss("", CalculationMode.Ticks, NSL, false);
 
             CalculateOnBarClose = false;
-            
-            DefaultQuantity = 1;
-            EntriesPerDirection = 1;
-            EntryHandling = EntryHandling.AllEntries; 
+			
+			DefaultQuantity = 1;
+			EntriesPerDirection = 1;
+    		EntryHandling = EntryHandling.AllEntries; 
         }
 
         /// <summary>
@@ -68,86 +57,83 @@ namespace NinjaTrader.Strategy
         /// </summary>
         protected override void OnBarUpdate()
         {
-            #region TimeFilter
-                
-                // Don't trade before 9:45AM EST
-                if(ToTime(Time[0]) < 94500)
-                    return;
-                
-                // Don't trade after 4PM
-                if(ToTime(Time[0]) >= 160000)
-                    return;
-                
-            #endregion
-                
-                
-            if (BarsInProgress == 1)
-            {
-                htfSMA = SMA(200)[0];
-                htfEMA = EMA(20)[0];
-            }
-            
-            if(BarsInProgress == 0)
-            {
-                if(Position.Quantity != 0 ||
-                   BarsSinceEntry(0, "", 0)  <= 2 || 
-                   BarsSinceExit(0, "", 0)   <= 2)
-                       return;
-                
-                // Condition set 1
-                if (htfEMA > htfSMA   &&
-                    My2ndEntries(4, 10, "", 20).Signal[0] == 1)
-                {
-                    EnterLong(1, "");
-                }
-                // Condition set 2
-                else if (htfEMA < htfSMA   &&
-                        My2ndEntries(4, 10, "", 20).Signal[0] == 2)
-                {
-                    EnterShort(1, "");
-                }
-            }
+			#region TimeFilter
+				
+				// Don't trade before 9:45AM EST
+				if(ToTime(Time[0]) < 94500)
+					return;
+				
+				// Don't trade after 4PM
+				if(ToTime(Time[0]) >= 160000)
+					return;
+				
+			#endregion
+				
+				
+			if (BarsInProgress == 1)
+			{
+				htfSMA = SMA(200)[0];
+				htfEMA = EMA(20)[0];
+			}
+			
+			if(BarsInProgress           == 0 &&
+			   Position.Quantity        == 0 &&
+			   ((BarsSinceExit(0, "", 0) >2)||(BarsSinceExit(0, "", 0)== -1)))
+			{				
+				// Condition set 1
+				if (htfEMA > htfSMA   &&
+					My2ndEntries(4, 10, "", 20).Signal[0] == 1)
+				{
+					EnterLong(1, "");
+				}
+				// Condition set 2
+				else if (htfEMA < htfSMA   &&
+						My2ndEntries(4, 10, "", 20).Signal[0] == 2)
+				{
+					EnterShort(1, "");
+				}
+			}
         }
-    
-        protected override void OnExecution(IExecution execution)
-        {
-        }
-        
-        protected override void OnTermination() 
-        {
-            //MyFileWriter.Instance.Terminate();
-        }
-        
-        private void MyPrint(string str)
-        {
-            PrintWithTimeStamp(_strName + "> " + str + "\n");
-        }
-        
-        private double RoundPrice(double value)
+		
+		protected override void OnExecution(IExecution execution)
+		{
+		}
+		
+		protected override void OnTermination() 
+		{
+			//MyFileWriter.Instance.Terminate();
+		}
+		
+		private void MyPrint(string str)
+		{
+			PrintWithTimeStamp(_strName + "> " + str + "\n");
+		}
+		
+		private double RoundPrice(double value)
         {
             return Bars.Instrument.MasterInstrument.Round2TickSize(value);
         }
 
         #region Properties
-        [Description("")]
+		[Description("")]
         [GridCategory("Parameters")]
-        public int FastFilter1
-        {
-            get { return nFastFilter1; }
+		public int FastFilter1
+		{
+			get { return nFastFilter1; }
             set { nFastFilter1 = Math.Max(1, value); }
-            
-        }
-        
-        [Description("")]
+			
+		}
+		
+		[Description("")]
         [GridCategory("Parameters")]
-        public int SlowFilter1
-        {
-            get { return nSlowFilter1; }
+		public int SlowFilter1
+		{
+			get { return nSlowFilter1; }
             set { nSlowFilter1 = Math.Max(1, value); }
-            
-        }
-        
-        [Description("")]
+			
+		}
+		
+		[Description("")]
         [GridCategory("Parameters")]
         public int NPT
         {
