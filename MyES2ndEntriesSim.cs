@@ -47,6 +47,7 @@ namespace NinjaTrader.Strategy
 
             CalculateOnBarClose = false;
 			
+			BarsRequired    = 20;
 			DefaultQuantity = 1;
 			EntriesPerDirection = 1;
     		EntryHandling = EntryHandling.AllEntries; 
@@ -77,7 +78,7 @@ namespace NinjaTrader.Strategy
 			}
 			
 			if(BarsInProgress           == 0 &&
-			   Position.Quantity        == 0 &&
+			   Position.MarketPosition  == MarketPosition.Flat &&
 			   ((BarsSinceExit(0, "", 0) >2)||(BarsSinceExit(0, "", 0)== -1)))
 			{				
 				// Condition set 1
