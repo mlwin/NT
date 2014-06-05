@@ -12,6 +12,17 @@ using NinjaTrader.Gui.Chart;
 using NinjaTrader.Strategy;
 #endregion
 
+// ************************************************************************************
+//
+// This code is provided on an "AS IS" basis, without warranty of any kind,
+// including without limitation the warranties of merchantability, fitness for a
+// particular purpose and non-infringement.
+//
+// Copyright (c) 2014
+// mlwin1@yahoo.com
+//
+// ************************************************************************************
+
 // This namespace holds all strategies and is required. Do not change it.
 namespace NinjaTrader.Strategy
 {
@@ -22,7 +33,7 @@ namespace NinjaTrader.Strategy
     public class MyCL2ndEntriesSim : Strategy
     {
         #region Variables
-	    private string _strName       = @"MyCL2ndEntriesSim";
+        private string _strName       = @"MyCL2ndEntriesSim";
         
         // Wizard generated variables
         private int nPT = 6; // Default setting for NPT
@@ -30,6 +41,8 @@ namespace NinjaTrader.Strategy
         
         double htfSMA   = 0.0;
         double htfEMA   = 0.0;
+        
+        double kStd = .68;
         
         // User defined variables (add any user defined variables below)
         #endregion
@@ -40,6 +53,7 @@ namespace NinjaTrader.Strategy
         protected override void Initialize()
         {
             Add(PeriodType.Minute, 15);
+
             SetProfitTarget("", CalculationMode.Ticks, NPT);
             //SetStopLoss("", CalculationMode.Ticks, NSL, false);
 
@@ -62,9 +76,17 @@ namespace NinjaTrader.Strategy
                     return;
                 
                 // Don't trade after 4PM
-                if(ToTime(Time[0]) >= 160000)
+                if(ToTime(Time[0]) >= 143000)
                     return;
                 
+            #endregion
+            
+            #region ExitBE
+                if(Position.MarketPosition != MarketPosition.Flat &&
+                   BarsSinceEntry(0, "", 0) > 8)
+                {
+                    SetProfitTarget("", CalculationMode.Ticks, 1);
+                }                
             #endregion
                 
                 
@@ -76,19 +98,22 @@ namespace NinjaTrader.Strategy
             if(BarsInProgress           == 0 &&
                Position.MarketPosition  == MarketPosition.Flat &&
                ((BarsSinceExit(0, "", 0) >2)||(BarsSinceExit(0, "", 0)== -1)))
-            {                
+            {
+                
                 // Condition set 1
-                if (htfEMA > htfSMA   &&
-                    My2ndEntries(4, 10, "", 20).Signal[0] == 1 &&
-					MyCLFilter(BarsArray[1], 19)[0] == 1)
+                if (My2ndEntries(4, 10, "", 20).Signal[0] == 1  &&
+                    MyCLFilter(BarsArray[1], 19).Signal[0] == 1 &&
+                    Close[0] < KeltnerChannel(kStd, 20).Upper[0])
                 {
+                    SetProfitTarget("", CalculationMode.Ticks, NPT);
                     EnterLong(1, "");
                 }
                 // Condition set 2
-                else if (htfEMA < htfSMA   &&
-                        My2ndEntries(4, 10, "", 20).Signal[0] == 2 &&
-					MyCLFilter(BarsArray[1], 19)[0] == 2)
+                else if (My2ndEntries(4, 10, "", 20).Signal[0] == 2  &&
+                         MyCLFilter(BarsArray[1], 19).Signal[0] == 2 &&
+                         Close[0] > KeltnerChannel(kStd, 20).Lower[0])
                 {
+                    SetProfitTarget("", CalculationMode.Ticks, NPT);
                     EnterShort(1, "");
                 }
             }
