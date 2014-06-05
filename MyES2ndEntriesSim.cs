@@ -47,6 +47,7 @@ namespace NinjaTrader.Strategy
 
             CalculateOnBarClose = false;
 			
+			BarsRequired    = 20;
 			DefaultQuantity = 1;
 			EntriesPerDirection = 1;
     		EntryHandling = EntryHandling.AllEntries; 
@@ -77,7 +78,7 @@ namespace NinjaTrader.Strategy
 			}
 			
 			if(BarsInProgress           == 0 &&
-			   Position.Quantity        == 0 &&
+			   Position.MarketPosition  == MarketPosition.Flat &&
 			   ((BarsSinceExit(0, "", 0) >2)||(BarsSinceExit(0, "", 0)== -1)))
 			{				
 				// Condition set 1
@@ -86,54 +87,54 @@ namespace NinjaTrader.Strategy
 				{
 					EnterLong(1, "");
 				}
-				// Condition set 2
-				else if (htfEMA < htfSMA   &&
-						My2ndEntries(4, 10, "", 20).Signal[0] == 2)
-				{
-					EnterShort(1, "");
-				}
-			}
+                // Condition set 2
+                else if (htfEMA < htfSMA   &&
+                        My2ndEntries(4, 10, "", 20).Signal[0] == 2)
+                {
+                    EnterShort(1, "");
+                }
+            }
         }
-		
-		protected override void OnExecution(IExecution execution)
-		{
-		}
-		
-		protected override void OnTermination() 
-		{
-			//MyFileWriter.Instance.Terminate();
-		}
-		
-		private void MyPrint(string str)
-		{
-			PrintWithTimeStamp(_strName + "> " + str + "\n");
-		}
-		
-		private double RoundPrice(double value)
+        
+        protected override void OnExecution(IExecution execution)
+        {
+        }
+        
+        protected override void OnTermination() 
+        {
+            //MyFileWriter.Instance.Terminate();
+        }
+        
+        private void MyPrint(string str)
+        {
+            PrintWithTimeStamp(_strName + "> " + str + "\n");
+        }
+        
+        private double RoundPrice(double value)
         {
             return Bars.Instrument.MasterInstrument.Round2TickSize(value);
         }
 
         #region Properties
-		[Description("")]
+        [Description("")]
         [GridCategory("Parameters")]
-		public int FastFilter1
-		{
-			get { return nFastFilter1; }
+        public int FastFilter1
+        {
+            get { return nFastFilter1; }
             set { nFastFilter1 = Math.Max(1, value); }
-			
-		}
-		
-		[Description("")]
+            
+        }
+        
+        [Description("")]
         [GridCategory("Parameters")]
-		public int SlowFilter1
-		{
-			get { return nSlowFilter1; }
+        public int SlowFilter1
+        {
+            get { return nSlowFilter1; }
             set { nSlowFilter1 = Math.Max(1, value); }
-			
-		}
-		
-		[Description("")]
+            
+        }
+        
+        [Description("")]
         [GridCategory("Parameters")]
         public int NPT
         {

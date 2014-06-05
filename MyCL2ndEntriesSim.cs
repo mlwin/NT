@@ -25,7 +25,7 @@ namespace NinjaTrader.Strategy
 	    private string _strName       = @"MyCL2ndEntriesSim";
         
         // Wizard generated variables
-        private int nPT = 8; // Default setting for NPT
+        private int nPT = 6; // Default setting for NPT
         private int nSL = 8; // Default setting for NSL
         
         double htfSMA   = 0.0;
@@ -74,18 +74,20 @@ namespace NinjaTrader.Strategy
             }
             
             if(BarsInProgress           == 0 &&
-               Position.Quantity        == 0 &&
+               Position.MarketPosition  == MarketPosition.Flat &&
                ((BarsSinceExit(0, "", 0) >2)||(BarsSinceExit(0, "", 0)== -1)))
             {                
                 // Condition set 1
                 if (htfEMA > htfSMA   &&
-                    My2ndEntries(4, 10, "", 20).Signal[0] == 1)
+                    My2ndEntries(4, 10, "", 20).Signal[0] == 1 &&
+					MyCLFilter(BarsArray[1], 19)[0] == 1)
                 {
                     EnterLong(1, "");
                 }
                 // Condition set 2
                 else if (htfEMA < htfSMA   &&
-                        My2ndEntries(4, 10, "", 20).Signal[0] == 2)
+                        My2ndEntries(4, 10, "", 20).Signal[0] == 2 &&
+					MyCLFilter(BarsArray[1], 19)[0] == 2)
                 {
                     EnterShort(1, "");
                 }
