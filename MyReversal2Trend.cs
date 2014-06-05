@@ -10,6 +10,17 @@ using NinjaTrader.Data;
 using NinjaTrader.Gui.Chart;
 #endregion
 
+// ************************************************************************************
+//
+// This code is provided on an "AS IS" basis, without warranty of any kind,
+// including without limitation the warranties of merchantability, fitness for a
+// particular purpose and non-infringement.
+//
+// Copyright (c) 2014
+// mlwin1@yahoo.com
+//
+// ************************************************************************************
+
 // This namespace holds all indicators and is required. Do not change it.
 namespace NinjaTrader.Indicator
 {
