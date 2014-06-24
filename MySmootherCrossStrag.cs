@@ -52,8 +52,8 @@ namespace NinjaTrader.Strategy
         /// </summary>
         protected override void Initialize()
         {
-            //SetProfitTarget("", CalculationMode.Ticks, 8);
-            //SetTrailStop("", CalculationMode.Ticks, 8, false);
+            SetProfitTarget("", CalculationMode.Ticks, 12);
+            SetStopLoss("", CalculationMode.Ticks, 8, false);
             
             _fastMAValues = new DataSeries(this);
             _slowMAValues = new DataSeries(this);
@@ -69,17 +69,6 @@ namespace NinjaTrader.Strategy
         /// </summary>
         protected override void OnBarUpdate()
         {        
-            #region TimeFilter
-                
-                // Don't trade before 9:45AM EST
-                if(ToTime(Time[0]) < 94500)
-                    return;
-                
-                // Don't trade after 4PM
-                if(ToTime(Time[0]) >= 143000)
-                    return;
-                
-            #endregion
                 
             //double fastEMA = EMA(FastMAPeriod)
             _fastMAValues.Set(EMA(fastMAPeriod)[0]);
@@ -103,7 +92,17 @@ namespace NinjaTrader.Strategy
                 }
             }
                 
+            #region TimeFilter
                 
+                // Don't trade before 9:45AM EST
+                if(ToTime(Time[0]) < 74500)
+                    return;
+                
+                // Don't trade after 4PM
+                if(ToTime(Time[0]) >= 143000)
+                    return;
+                
+            #endregion
                 
             if(_fastSRValues[0] > _slowSRValues[0] &&
                _slowMAValues[0] > _fastSRValues[0])
