@@ -73,7 +73,7 @@ namespace NinjaTrader.Strategy
 				return;
                 
             //double fastEMA = EMA(FastMAPeriod)
-            _fastMAValues.Set(EMA(Typical, fastMAPeriod)[0]);
+			_fastMAValues.Set(anaSuperSmootherFilter(fastMAPeriod, 2)[0]);
             _slowMAValues.Set(anaSuperSmootherFilter(slowMAPeriod, 2)[0]);
             
             _fastSRValues.Set(anaSuperSmootherFilter(fastSRPeriod, 2)[0]);
