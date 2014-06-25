@@ -69,6 +69,8 @@ namespace NinjaTrader.Strategy
         /// </summary>
         protected override void OnBarUpdate()
         {        
+			if(Historical)
+				return;
                 
             //double fastEMA = EMA(FastMAPeriod)
             _fastMAValues.Set(EMA(Typical, fastMAPeriod)[0]);
