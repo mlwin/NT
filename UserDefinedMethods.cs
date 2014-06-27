@@ -17,52 +17,80 @@ namespace NinjaTrader.Strategy
     /// </summary>
     partial class Strategy
     {
-            #region MyFileWriterClass
-            public class MyFileWriter
+        #region MyFileWriterClass
+        public class MyFileWriter
+        {
+            // NOTE: Need to include -- using System.IO;
+            
+            private static MyFileWriter _instance;
+            private static string path = "C:\\trades\\data.csv";
+            private static System.IO.StreamWriter sw;
+            
+            private MyFileWriter(){}
+            
+            public static MyFileWriter Instance
             {
-                // NOTE: Need to include -- using System.IO;
-                
-                private static MyFileWriter _instance;
-                private static string path = "C:\\trades\\data.csv";
-                private static System.IO.StreamWriter sw;
-                
-                private MyFileWriter(){}
-                
-                public static MyFileWriter Instance
+                get
                 {
-                    get
+                    if(_instance == null)
                     {
-                        if(_instance == null)
-                        {
-                            _instance = new MyFileWriter();
-                        }
-                        return _instance;
+                        _instance = new MyFileWriter();
                     }
-                }
-                
-                public void SetPath(string p)
-                {
-                    path = p;
-                }
-                
-                // Need to call this from OnTermination
-                public void Terminate()
-                {
-                    if(sw != null)
-                    {
-                        sw.Dispose();
-                        sw = null;
-                    }    
-                }
-                            
-                public void WriteLine(String data)
-                {
-                    if(sw == null)
-                        sw = new StreamWriter(path);
-                    
-                    sw.WriteLine(data);
+                    return _instance;
                 }
             }
+            
+            public void SetPath(string p)
+            {
+                path = p;
+            }
+            
+            // Need to call this from OnTermination
+            public void Terminate()
+            {
+                if(sw != null)
+                {
+                    sw.Dispose();
+                    sw = null;
+                }    
+            }
+                        
+            public void WriteLine(String data)
+            {
+                if(sw == null)
+                    sw = new StreamWriter(path);
+                
+                sw.WriteLine(data);
+            }
+        }
         #endregion
+    
+        // Example: pass in DayOfWeek.Monday
+        bool IsCurrentDay(DayOfWeek day)
+        {
+            DayOfWeek today = DateTime.Today.DayOfWeek;
+            
+            if(today == day)
+                return true;
+            
+            return false;
+        }
+        
+        // Example: 74500 = 7:45AM, 134500 = 1:45PM
+        bool IsDayTime(DayOfWeek day, int startTime, int endTime)
+        {
+            if(IsCurrentDay(day) &&
+               ToTime(Time[0]) >= startTime && 
+               ToTime(Time[0]) <= endTime)
+                return true;
+            
+            return false;
+        }
+        
+        string CurrentBarDateTimeStr()
+        {
+            DateTime barDT = Time[0];
+            return barDT.ToString("mm/dd/yyyy, hh:mm");
+        }
     }
 }
