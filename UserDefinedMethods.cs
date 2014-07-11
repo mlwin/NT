@@ -17,12 +17,14 @@ namespace NinjaTrader.Strategy
     /// </summary>
     partial class Strategy
     {
+		protected int lastBarInTrade = 0;
+		
         #region MyFileWriterClass
         public class MyFileWriter
         {
             // NOTE: Need to include -- using System.IO;
             
-            private static MyFileWriter _instance;
+            private static MyFileWriter _instance = new MyFileWriter();
             private static string path = "C:\\trades\\data.csv";
             private static System.IO.StreamWriter sw;
             
@@ -56,17 +58,18 @@ namespace NinjaTrader.Strategy
             }
                         
             public void WriteLine(String data)
-            {
+            {				
                 if(sw == null)
-                    sw = new StreamWriter(path);
+                    sw = new StreamWriter(path, true);
                 
                 sw.WriteLine(data);
+				sw.Flush();
             }
         }
         #endregion
     
         // Example: pass in DayOfWeek.Monday
-        bool IsCurrentDay(DayOfWeek day)
+        public bool IsCurrentDay(DayOfWeek day)
         {
             DayOfWeek today = DateTime.Today.DayOfWeek;
             
@@ -77,7 +80,7 @@ namespace NinjaTrader.Strategy
         }
         
         // Example: 74500 = 7:45AM, 134500 = 1:45PM
-        bool IsDayTime(DayOfWeek day, int startTime, int endTime)
+        public bool IsDayTime(DayOfWeek day, int startTime, int endTime)
         {
             if(IsCurrentDay(day) &&
                ToTime(Time[0]) >= startTime && 
@@ -87,10 +90,15 @@ namespace NinjaTrader.Strategy
             return false;
         }
         
-        string CurrentBarDateTimeStr()
+        public string CurrentBarDateTimeStr()
         {
             DateTime barDT = Time[0];
-            return barDT.ToString("mm/dd/yyyy, hh:mm");
+            return barDT.ToString("MM/dd/yyyy HH:mm");
+        }
+		
+		public double RoundPrice(double value)
+        {
+            return Bars.Instrument.MasterInstrument.Round2TickSize(value);
         }
     }
 }
